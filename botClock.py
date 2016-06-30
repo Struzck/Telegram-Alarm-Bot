@@ -182,7 +182,7 @@ def handle(msg):		#Main method. Manages the user input.
     			now = datetime.datetime.now().time()
     			totalHour = now.replace(hour = int(hour), minute = int(minute), second = 0, microsecond = 0)
     			time.sleep(0.75)
-    			text5 = "The alarm is set for " + str(totalHour)
+    			text5 = "The alarm is set for " + str(totalHour) + " write /run to begin."
     			bot.sendMessage(chat_id, text5)
     			state = state + 1
     		else:
@@ -213,11 +213,11 @@ def handle(msg):		#Main method. Manages the user input.
     if command == '/start':
     	 bot.sendMessage(chat_id, "Welcome to RaspberryPiAlarm bot. Write /help to see more info.")
     elif command == '/help':
-        bot.sendMessage(chat_id, "The available commands are /setalarm /configure /reset /info y /run")
+        bot.sendMessage(chat_id, "The available commands are /setalarm /settings /reset /info y /run")
     elif command == '/setalarm':
     	alarm = True
     	next()        
-    elif command == '/configure':
+    elif command == '/settings':
     	bot.sendMessage(chat_id, "Configure bot. Coming soon.")
     elif command == '/info':
     	textInfo1 = "Solved questions: " + str(correct)
