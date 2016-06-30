@@ -1,3 +1,6 @@
+
+########### @RaspberryPiAlarmBot ###########
+
 import time
 import random
 import datetime
@@ -207,7 +210,7 @@ def handle(msg):		#Main method. Manages the user input.
     	 bot.sendMessage(chat_id, "Welcome to RaspberryPiAlarm bot. Write /help to see more info.")
     elif command == '/help':
         bot.sendMessage(chat_id, "The available commands are /setAlarm /configure /reset /info y /run")
-    elif command == '/setAlarm':
+    elif command == '/setalarm':
     	alarm = True
     	next()        
     elif command == '/configure':
@@ -232,6 +235,7 @@ def handle(msg):		#Main method. Manages the user input.
     	correct = 0
     	running = True
     	first = True
+    	bot.sendMessage(chat_id, "Alarm running, it will work at selected hour.")
     	t.start()
     elif running == True and correct < 3:
     	work()
