@@ -26,11 +26,15 @@ alarm = False		#Is alarm enabled or disabled?
 
 Questions = {}		#Set of answers with its possible solutions, only one of them is the correct one.
 Questions["9X + 3 = -69"] = [-8, -4, -7, -2]
-Questions["6X - 10 = -38"] = [-8, 5, 8, -5]
 Questions["7X + 6 = -64"] = [-8, -12, -2, -10]
-Questions["9X + 8 = 44"] = [6, 4, 5, 8]
-Questions["9X - 8 = -53"] = [-8, -5, -7, -6]
-
+Questions["11X + 7 = 51"] = [2, 4, 5, 3]
+Questions["9X - 2 = 70"] = [7, 8, 5, 6]
+Questions["2X + 10 = 26"] = [7, 8, 5, 6]
+Questions["8X + 7 = -33"] = [-4, -6, -5, -7]
+Questions["11X + 8 = 74"] = [6, 8, 5, 7]
+Questions["10X + 5 = -85"] = [-8, -7, -9, 7]
+Questions["8X - 5 = 51"] = [7, 8, 5, 6]
+Questions["7X - 11 = -74"] = [-7, -8, -5, -9]
 
 
 
@@ -209,12 +213,12 @@ def handle(msg):		#Main method. Manages the user input.
     if command == '/start':
     	 bot.sendMessage(chat_id, "Welcome to RaspberryPiAlarm bot. Write /help to see more info.")
     elif command == '/help':
-        bot.sendMessage(chat_id, "The available commands are /setAlarm /configure /reset /info y /run")
+        bot.sendMessage(chat_id, "The available commands are /setalarm /configure /reset /info y /run")
     elif command == '/setalarm':
     	alarm = True
     	next()        
     elif command == '/configure':
-    	bot.sendMessage(chat_id, "Configuracion del shurBot")
+    	bot.sendMessage(chat_id, "Configure bot. Coming soon.")
     elif command == '/info':
     	textInfo1 = "Solved questions: " + str(correct)
     	if not totalHour:
