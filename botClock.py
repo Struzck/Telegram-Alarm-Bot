@@ -123,8 +123,6 @@ def handle(msg):		#Main method. Manages the user input.
 
 		
     def next():		#Generates a keyboard with a "Continue" key.
-    	if not actualEquation:
-    		threading.Timer(60, work).start () 	
     	keyboardLayout = [['Continue']]
     	replyKeyboardMakeup = {'keyboard': keyboardLayout, 'resize_keyboard': False, 'one_time_keyboard': True}
     	bot.sendMessage(chat_id, text = 'Press continue.', reply_markup = replyKeyboardMakeup)
