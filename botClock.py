@@ -12,7 +12,7 @@ import datetime
 
 correct = 0		#Number of correct answers.
 stopQuestion = 3		#Number of correct answers needed to stop the alarm.
-actualEquation = ""		
+actualEquation = None		
 running = False		#Alarm's state.
 first = True		#First iteration of equation generator.
 state = 0		#SetAlarm's state.
@@ -123,7 +123,8 @@ def handle(msg):		#Main method. Manages the user input.
 
 		
     def next():		#Generates a keyboard with a "Continue" key.
-    	threading.Timer(60, work).start ()
+    	if not actualEquation:
+    		threading.Timer(60, work).start () 	
     	keyboardLayout = [['Continue']]
     	replyKeyboardMakeup = {'keyboard': keyboardLayout, 'resize_keyboard': False, 'one_time_keyboard': True}
     	bot.sendMessage(chat_id, text = 'Press continue.', reply_markup = replyKeyboardMakeup)
@@ -251,19 +252,7 @@ def handle(msg):		#Main method. Manages the user input.
     	bot.sendMessage(chat_id, "Message not recognized.")		
     					
 
-    		
-    		
-    		
-    		
-    		
-    		
-    			
-    			
-    			
-    		
-    			
-    				
-
+    						
 bot = telepot.Bot('235395608:AAG71dYTu3zv-25nlK09Cdf0lM6PSFisrmc')
 bot.message_loop(handle)
 print 'I am listening ...'
