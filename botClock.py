@@ -54,7 +54,7 @@ def resolve(ecuacion, number):		#Gets an equation as String ("ecuacion") and ret
 	
 
 
-def handle(msg):		#Main method. Manages the user input.   
+def handle(msg):		#Main method. Manages the user input. 	
     global running
     global Questions
     global correct
@@ -67,7 +67,9 @@ def handle(msg):		#Main method. Manages the user input.
     chat_id = msg['chat']['id']		#User's chat id.
     command = msg['text']		#User's text input.
 
-
+    tm = threading.Thread(target = handle, args = (command, ))
+    tm.start()
+  	
     def generateEquation():		#Generates an equation and shows a keyboard with its possible solutions.
     	global actualEquation
 
