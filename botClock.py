@@ -1,6 +1,3 @@
-#http://pastebin.com/emXavSB6
-
-
 import time
 import random
 import datetime
@@ -10,105 +7,101 @@ import datetime
 
 
 
+correct = 0		#Number of correct answers.
+stopQuestion = 3		#Number of correct answers needed to stop the alarm.
+actualEquation = ""		
+running = False		#Alarm's state.
+first = True		#First iteration of equation generator.
+state = 0		#SetAlarm's state.
+hour = ""		#Alarm's hour.
+confirmedHour = ""		#Alarm's confirmed hour.
+minute = ""		#Alarm's minute.
+confirmedMinute = ""		#Alarm's confirmed minute.
+totalHour = None		#Confirmed hour + confirmed minute.
+alarm = False		#Is alarm enabled or disabled?
 
-correctas=0
-stopPreguntas=3
-ecuacionActual=""
-running=False
-first=True
-estado=0
-hora=""
-horaConfirma=""
-minuto=""
-minutoConfirma=""
-horaTotal= ""
-pruebecita=False
 
-
-preguntas = {}
-preguntas["9X + 3 = -69"]=[-8, -4, -7, -2]
-preguntas["6X - 10 = -38"]=[-8, 5, 8, -5]
-preguntas["7X + 6 = -64"]=[-8, -12, -2, -10]
-preguntas["9X + 8 = 44"]=[6, 4, 5, 8]
-preguntas["9X - 8 = -53"]=[-8, -5, -7, -6]
-
+Questions = {}		#Set of answers with its possible solutions, only one of them is the correct one.
+Questions["9X + 3 = -69"] = [-8, -4, -7, -2]
+Questions["6X - 10 = -38"] = [-8, 5, 8, -5]
+Questions["7X + 6 = -64"] = [-8, -12, -2, -10]
+Questions["9X + 8 = 44"] = [6, 4, 5, 8]
+Questions["9X - 8 = -53"] = [-8, -5, -7, -6]
 
 
 
-def pregunta():
-    	eleccion=random.choice(preguntas.keys())
-    	respuestas=preguntas.get(eleccion)
-    	return eleccion
 
-def teclado(ecuacion):
-	respuestas=[]
-	for i in preguntas.get(ecuacion):
-		respuestas.append(i)
-	return respuestas
+def getEcuation():		#Returns a equation from Questions set.
+    	equation = random.choice(Questions.keys())
+    	return equation
 
-def resolve(ecuacion, number):
-	x=int(ecuacion[0])
-	z=x*int(number)
-	resol=ecuacion
-	resol=resol.replace(resol[0],"")
-	resol=resol.replace(resol[0], str(z))
-	resol=resol.replace(" ","")
+def keyboard(ecuacion):		#Returns the set of possible solutions of "ecuacion".
+	solutions = []
+	for i in Questions.get(ecuacion):
+		solutions.append(i)
+	return solutions
+
+def resolve(ecuacion, number):		#Gets an equation as String ("ecuacion") and return if its solution ("number") is correct.
+	x = int(ecuacion[0])
+	z = x * int(number)
+	resol = ecuacion
+	resol = resol.replace(resol[0], "")
+	resol = resol.replace(resol[0], str(z))
+	resol = resol.replace(" ", "")
 	left, right = resol.split('=')
 	return eval(left) == eval(right)
 
 	
 
 
-def handle(msg):
-    chat_id = msg['chat']['id']
-    command = msg['text']
+def handle(msg):		#Main method. Manages the user input.   
     global running
-    global preguntas
-    global correctas
-    global ecuacionActual
-    global stopPreguntas
+    global Questions
+    global correct
+    global actualEquation
+    global stopQuestion
     global first
-    global horaTotal
-    global pruebecita
+    global totalHour
+    global alarm
+
+    chat_id = msg['chat']['id']		#User's chat id.
+    command = msg['text']		#User's text input.
 
 
-    def generateEquation():
-    	global preguntas
-    	global correctas
-    	global ecuacionActual
-    	global stopPreguntas
+    def generateEquation():		#Generates an equation and shows a keyboard with its possible solutions.
+    	global actualEquation
 
-    	ecuacion=pregunta()
-    	ecuacionActual=ecuacion
-    	keyboardLayout = [[str(teclado(ecuacion)[0]), str(teclado(ecuacion)[1])],[str(teclado(ecuacion)[2]), str(teclado(ecuacion)[3])]]
-    	replyKeyboardMakeup={'keyboard': keyboardLayout, 'resize_keyboard': False, 'one_time_keyboard': False}
-    	bot.sendMessage(chat_id, text=ecuacionActual, reply_markup=replyKeyboardMakeup)
+    	ecuacion = getEcuation()
+    	actualEquation = ecuacion
+    	keyboardLayout = [[str(keyboard(ecuacion)[0]), str(keyboard(ecuacion)[1])],[str(keyboard(ecuacion)[2]), str(keyboard(ecuacion)[3])]]
+    	replyKeyboardMakeup = {'keyboard': keyboardLayout, 'resize_keyboard': False, 'one_time_keyboard': False}
+    	bot.sendMessage(chat_id, text = actualEquation, reply_markup = replyKeyboardMakeup)
 
 
-    def checkSolution():
-    	global running
-    	global correctas
-    	global ecuacionActual
-    	global first
-    	sol=resolve(ecuacionActual, command)
+    def checkSolution():		#Checks if the answer given ("command") is correct and update the number of correct answers.
+    	global correct
+    	global actualEquation
+    	global stopQuestion
+
+    	sol = resolve(actualEquation, command)
     	if sol == True:
-    		correctas=correctas+1
-    		Text="Correcto. Preguntas acertadas: "+str(correctas)
-    		bot.sendMessage(chat_id, text=Text)
+    		correct = correct + 1
+    		Text = "Correct. Solved questions: " + str(correct)
+    		bot.sendMessage(chat_id, text = Text)
+    		if correct == stopQuestion:
+    			time.sleep(0.5)
+    			bot.sendMessage(chat_id, "The alarm has been disabled.")
     	else:
-    		Text="Incorrecto. Preguntas acertadas: "+str(correctas)
-    		bot.sendMessage(chat_id, text=Text)
-    		if(correctas==3):
-    			running= False
+    		Text="Incorrect. Solved questions: " + str(correct)
+    		bot.sendMessage(chat_id, text = Text)  		
     			
 
-    def work():
+    def work():		#Checks the given solution and generates a new equation. This function repeats every minute.
     	threading.Timer(60, work).start ()
 
-    	global running
-    	global correctas
-    	global ecuacionActual
+    	global correct
     	global first
+    	global stopQuestion
 
     	if first == True:
     		generateEquation()
@@ -116,114 +109,138 @@ def handle(msg):
     	else:
     		checkSolution()
     		time.sleep(1)
-    		generateEquation()
-    
+    		if correct < stopQuestion:
+    			generateEquation()
 
-    def next():
+		
+    def next():		#Generates a keyboard with a "Continue" key.
+    	threading.Timer(60, work).start ()
     	keyboardLayout = [['Continue']]
-    	replyKeyboardMakeup={'keyboard': keyboardLayout, 'resize_keyboard': False, 'one_time_keyboard': True}
-    	bot.sendMessage(chat_id, text='Presione continuar', reply_markup=replyKeyboardMakeup)
+    	replyKeyboardMakeup = {'keyboard': keyboardLayout, 'resize_keyboard': False, 'one_time_keyboard': True}
+    	bot.sendMessage(chat_id, text = 'Press continue.', reply_markup = replyKeyboardMakeup)
     	time.sleep(0.5)
 
 
-    def setAlarm(texto, estado2):
-    	global hora
-    	global horaConfirma
-    	global minuto
-    	global minutoConfirma
-    	global estado
-    	global horaTotal
+    def setAlarm(texto, state2):		#This method is divided by states, each one manages the steps of selecting the alarm.
+    	global hour
+    	global confirmedHour
+    	global minute
+    	global confirmedMinute
+    	global state
+    	global totalHour
 
-    	estado=estado2
-    	if estado == 0:
-    		bot.sendMessage(chat_id, text='Seleccione la HORA a la que sonara la alarma. Formato 24h.')
-    		estado= estado+1
-    	elif estado == 1:
+    	state = state2
+
+    	if state == 0:
+    		bot.sendMessage(chat_id, text = 'Select the alarm\'s hour. 24h Format.')
+    		state = state + 1
+    	elif state == 1:
     		try:
-    			hora=texto
-    			text1="La HORA seleccionada es "+ hora +" confirmela seleccionandola de nuevo."
+    			hour = texto
+    			text1 = "The seleccted hour is "+ hour +" please, confirm it."
     			bot.sendMessage(chat_id, text1)
-    			estado= estado+1
+    			state = state + 1
     		except Exception as e: 
-    			text11= "Error en el formato de la hora. " + str(e)
+    			text11 = "Hour's format error. " + str(e)
     			bot.sendMessage(chat_id, text11)
-    			estado=0
-    	elif estado == 2:
-    			horaConfirma=texto
-    			if horaConfirma == hora:
-    				text2="La hora seleccionada es " + hora
+    			state = 0
+    	elif state == 2:
+    			confirmedHour = texto
+    			if confirmedHour == hour:
+    				text2 = "Selected hour: " + hour
     				bot.sendMessage(chat_id, text2)
     				time.sleep(0.75)
-    				bot.sendMessage(chat_id, text='Seleccione los MINUTOS a la que sonara la alarma.')
-    				estado = estado + 1
+    				bot.sendMessage(chat_id, text = 'Select the alarm\'s minutes.')
+    				state = state + 1
     			else:
-    				bot.sendMessage(chat_id, "Las horas no coinciden")
-    				estado = 0
-    	elif estado == 3:
+    				bot.sendMessage(chat_id, "Wrong hour confirmation. Alarm has been reset.")
+    				state = 0
+    	elif state == 3:
     		try:
-    			minuto=texto
-    			text4="Los minutos seleccionados son " + minuto + " confirmelos seleccionandola de nuevo."
-    			bot.sendMessage(chat_id, text4)
-    			estado= estado+1
+    			minute = texto
+    			text3 = "The seleccted minutes are " + minute + " please, confirm them."
+    			bot.sendMessage(chat_id, text3)
+    			state = state + 1
     		except Exception as e2:
-    			text44="Error en el formato de los minutos. " + str(e2)
-    			bot.sendMessage(chat_id, text44)
-    			estado=3
-    	elif estado == 4:
-    		minutoConfirma=texto
-    		if  minutoConfirma == minuto:
-    			text5="Los minutos seleccionados son " + minuto
-    			bot.sendMessage(chat_id, text5)
+    			text33 = "Minute's format error. " + str(e2)
+    			bot.sendMessage(chat_id, text33)
+    			state = 0
+    	elif state == 4:
+    		confirmedMinute = texto
+    		if  confirmedMinute == minute:
+    			text4 = "Selected minutes: " + minute
+    			bot.sendMessage(chat_id, text4)
     			now = datetime.datetime.now().time()
-    			horaTotal = now.replace(hour=int(hora), minute=int(minuto), second=0, microsecond=0)
+    			totalHour = now.replace(hour = int(hour), minute = int(minute), second = 0, microsecond = 0)
     			time.sleep(0.75)
-    			text7= "La alarma esta programada para las " + str(horaTotal)
-    			bot.sendMessage(chat_id, text7)
-    			estado = estado + 1
+    			text5 = "The alarm is set for " + str(totalHour)
+    			bot.sendMessage(chat_id, text5)
+    			state = state + 1
     		else:
-    			bot.sendMessage(chat_id, "Los minutos no coinciden")
-    			estado = 0
+    			bot.sendMessage(chat_id, "Wrong minutes confirmation. Alarm has been reset.")
+    			state = 0
 
-    		
+    def alarmWork():
+    	stop=0
+    	while stop < 1:
+    		now = datetime.datetime.now().time()
+    		now2 = now.replace(second = 0, microsecond = 0)
+    		if now2 == totalHour:
+    			stop = 1		
+    	next()		
+
+
+    	
 
     			
 
-    			    				
+    					    				
     				
 
     print 'Got command: %s' % command
+    t = threading.Thread(target = alarmWork)
+    t.setDaemon(True)
 
-    if command == '/help':
-        bot.sendMessage(chat_id, "Los comandos disponibles son /setAlarm /configure /reset /info y /run")
+    if command == '/start':
+    	 bot.sendMessage(chat_id, "Welcome to RaspberryPiAlarm bot. Write /help to see more info.")
+    elif command == '/help':
+        bot.sendMessage(chat_id, "The available commands are /setAlarm /configure /reset /info y /run")
     elif command == '/setAlarm':
-        bot.sendMessage(chat_id, "Seleccione la hora de la alarma")
+    	alarm = True
+    	next()        
     elif command == '/configure':
     	bot.sendMessage(chat_id, "Configuracion del shurBot")
     elif command == '/info':
-    	bot.sendMessage(chat_id, "Informacion de las preguntas correctas actuales")	
+    	textInfo1 = "Solved questions: " + str(correct)
+    	if not totalHour:
+    		textInfo2 = "The alarm has not been set yet."
+    	else:
+    		textInfo2 = "The alarm is set for: " + str(totalHour)	  	
+    	bot.sendMessage(chat_id, textInfo1)	
+    	time.sleep(0.65)
+    	bot.sendMessage(chat_id, textInfo2)
     elif command == '/reset':
-    	correctas=0
-    	bot.sendMessage(chat_id, "Preguntas correctas = 0")	
-    	bot.sendMessage(chat_id, "Alarma desactivada")	
+    	correct = 0
+    	totalHour = None
+    	alarm = False
+    	running = False
+    	bot.sendMessage(chat_id, "Solved questions: 0")	
+    	bot.sendMessage(chat_id, "Alarm disabled.")	
     elif command == '/run':
-    	correctas = 0
-    	running= True
-    	first=True
-    	next()
-    elif running ==True and correctas < 3:
+    	correct = 0
+    	running = True
+    	first = True
+    	t.start()
+    elif running == True and correct < 3:
     	work()
-    elif command == '/prueba':
-    	bot.sendMessage(chat_id, "Prueba")
-    	pruebecita = True
-    	next()
-    elif pruebecita == True:
-    	setAlarm(command, estado)
-
-'''
+    elif alarm == True:
+    	setAlarm(command, state)
+    elif correct >= 3:
+    	bot.sendMessage(chat_id, "The alarm is disabled.")	
     else: 
-    	print "FIN: ", correctas	
+    	bot.sendMessage(chat_id, "Message not recognized.")		
     					
-   ''' 		
+
     		
     		
     		
