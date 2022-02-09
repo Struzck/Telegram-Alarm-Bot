@@ -1,0 +1,7 @@
+###### Requirements without Version Specifiers ######
+time
+random
+datetime
+telepot
+threading
+datetime
