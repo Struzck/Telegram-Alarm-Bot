@@ -1,5 +1,4 @@
 ###### Requirements without Version Specifiers ######
-random
 datetime
 telepot
 threading
